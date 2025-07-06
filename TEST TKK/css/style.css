@@ -1,0 +1,447 @@
+:root {
+    --glass-bg: rgba(255,255,255,0.25);
+    --glass-bg-dark: rgba(24,24,32,0.45);
+    --glass-border: rgba(255,255,255,0.18);
+    --glass-border-dark: rgba(255,255,255,0.10);
+    --glass-shadow: 0 8px 32px 0 rgba(31,38,135,0.18);
+    --glass-shadow-dark: 0 8px 32px 0 rgba(0,0,0,0.35);
+    --primary-color: #cc0044;
+    --secondary-color: #01a15f;
+    --danger-color: #ef4444;
+    --text-color: #23272f;
+    --radius-md: 16px;
+    --radius-lg: 28px;
+}
+
+body.dark-mode {
+    --glass-bg: rgba(24,24,32,0.65);
+    --glass-border: rgba(255,255,255,0.12);
+    --glass-shadow: 0 8px 32px 0 rgba(0,0,0,0.35);
+    --text-color: #f3f4f6;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
+    color: var(--text-color);
+    transition: background 0.5s, color 0.3s;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+}
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(204,0,68,0.08) 60%, rgba(108,99,255,0.10) 100%);
+    mix-blend-mode: lighten;
+    opacity: 0.7;
+}
+body.dark-mode {
+    background: linear-gradient(135deg, #181a20 0%, #23242a 100%);
+}
+body.dark-mode::before {
+    background: linear-gradient(120deg, rgba(255,255,255,0.08) 0%, rgba(108,99,255,0.10) 60%, rgba(204,0,68,0.08) 100%);
+    mix-blend-mode: lighten;
+    opacity: 0.4;
+}
+
+/* Glassmorphism Card */
+.glassmorph {
+    background: var(--glass-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1.5px solid var(--glass-border);
+    animation: glass-fadein 1s cubic-bezier(0.4,0,0.2,1);
+    transition: background 0.3s, box-shadow 0.3s, border 0.3s;
+}
+body.dark-mode .glassmorph {
+    background: var(--glass-bg-dark);
+    border: 1.5px solid var(--glass-border-dark);
+    box-shadow: var(--glass-shadow-dark);
+}
+
+/* Glassmorph Buttons */
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    transition: all 0.3s;
+    background: var(--glass-bg);
+    box-shadow: 0 2px 8px 0 rgba(31,38,135,0.10);
+    border: 1.5px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--primary-color);
+}
+.btn-primary {
+    background: linear-gradient(90deg, #cc0044 60%, #6c63ff 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 16px 0 rgba(204,0,68,0.12);
+}
+.btn-primary:hover {
+    background: linear-gradient(90deg, #6c63ff 0%, #cc0044 100%);
+    transform: translateY(-2px) scale(1.03);
+}
+.btn-primary:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px 0 rgba(204,0,68,0.18);
+}
+.btn-secondary {
+    background: var(--glass-bg);
+    color: var(--secondary-color);
+    border: 1.5px solid var(--glass-border);
+}
+.btn-secondary:hover {
+    color: #059669;
+    background: rgba(1,161,95,0.08);
+    transform: translateY(-2px) scale(1.03);
+}
+.btn-danger {
+    background: var(--glass-bg);
+    color: var(--danger-color);
+    border: 1.5px solid var(--glass-border);
+}
+.btn-danger:hover {
+    color: #dc2626;
+    background: rgba(239,68,68,0.08);
+    transform: translateY(-2px) scale(1.03);
+}
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Glassmorph Inputs & Selects */
+.custom-select,
+textarea,
+input[type="text"],
+input[type="number"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: var(--glass-bg);
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--glass-border);
+    box-shadow: 0 2px 8px 0 rgba(31,38,135,0.08);
+    color: var(--text-color);
+    padding: 0.75rem 1rem;
+    transition: background 0.3s, border 0.3s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.custom-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.2em;
+    padding-right: 3rem;
+}
+body.dark-mode .custom-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23d1d5db' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+textarea:focus,
+input:focus,
+.custom-select:focus {
+    outline: none;
+    border-color: #6c63ff;
+    background: rgba(108,99,255,0.08);
+}
+
+/* Glassmorph Neumorphic Cards */
+.neumorphic-outset,
+.neumorphic-inset {
+    background: var(--glass-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    border: 1.5px solid var(--glass-border);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    animation: glass-fadein 1s cubic-bezier(0.4,0,0.2,1);
+    transition: background 0.3s, box-shadow 0.3s, border 0.3s;
+}
+body.dark-mode .neumorphic-outset,
+body.dark-mode .neumorphic-inset {
+    background: var(--glass-bg-dark);
+    border: 1.5px solid var(--glass-border-dark);
+    box-shadow: var(--glass-shadow-dark);
+}
+.neumorphic-outset-interactive:hover,
+.neumorphic-inset:hover {
+    box-shadow: 0 12px 32px 0 rgba(31,38,135,0.20);
+    background: rgba(255,255,255,0.32);
+}
+.neumorphic-outset-interactive:active,
+.neumorphic-inset:active {
+    box-shadow: 0 2px 8px 0 rgba(31,38,135,0.10);
+    background: rgba(255,255,255,0.22);
+}
+
+/* Tool Buttons Glassmorph */
+.tool-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    background: var(--glass-bg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--glass-shadow);
+    border: 1.5px solid var(--glass-border);
+    transition: all 0.2s;
+    text-align: center;
+    cursor: pointer;
+    color: var(--primary-color);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+.tool-btn:hover {
+    transform: translateY(-2px) scale(1.04);
+    background: rgba(204,0,68,0.08);
+}
+.tool-btn:active,
+.tool-btn.active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px 0 rgba(204,0,68,0.18);
+    color: #6c63ff;
+}
+.tool-btn i {
+    font-size: 1.75rem;
+    color: var(--primary-color);
+    pointer-events: none;
+}
+.tool-btn span {
+    pointer-events: none;
+}
+
+/* Action Buttons */
+.action-btn {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+/* Enhance Thumbnail Selection */
+.enhance-thumbnail {
+    border: 3px solid transparent;
+    border-radius: var(--radius-md);
+    transition: border-color 0.2s;
+    box-shadow: 0 2px 8px 0 rgba(31,38,135,0.10);
+}
+.enhance-thumbnail.selected {
+    border-color: #6c63ff;
+}
+
+/* Glassmorph Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(108,99,255,0.18);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #6c63ff;
+}
+
+/* Glassmorph Modal Overlay */
+#info-modal,
+#preview-modal,
+#donation-modal,
+#loading-indicator {
+    background: rgba(24,24,32,0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: glass-fadein 0.7s;
+}
+
+/* Glassmorph Animation for Cards */
+.glassmorph,
+.neumorphic-outset,
+.neumorphic-inset,
+.tool-btn,
+.btn,
+.custom-select,
+textarea,
+input[type="text"],
+input[type="number"] {
+    animation: glass-fadein 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Expandable Tool Section */
+.tool-content {
+    display: none;
+    animation: glass-fadein 0.7s;
+    transition: all 0.5s;
+}
+.tool-content.expanded {
+    display: block;
+}
+
+/* iOS-style toggle thumb animation */
+#setting-modal .inline-flex.relative {
+    min-width: 44px;
+}
+#setting-modal input[type="checkbox"].sr-only + div {
+    transition: background 0.3s;
+    background: #9b9b9b !important;
+}
+#setting-modal input[type="checkbox"].sr-only:checked + div {
+    transition: background 0.3s;
+    background: #00d10a !important;
+}
+#setting-modal input[type="checkbox"].sr-only + div + div {
+    transition: transform 0.3s;
+    background: #dadada !important;
+}
+
+/* Neumorphic 3D Styles */
+body.neumorphic-3d {
+    background: #e0e5ec !important;
+    color: #23272f;
+}
+body.neumorphic-3d .glassmorph,
+body.neumorphic-3d .neumorphic-outset,
+body.neumorphic-3d .neumorphic-inset,
+body.neumorphic-3d .btn,
+body.neumorphic-3d .custom-select,
+body.neumorphic-3d textarea,
+body.neumorphic-3d input[type="text"],
+body.neumorphic-3d input[type="number"] {
+    background: #e0e5ec !important;
+    border-radius: 18px !important;
+    box-shadow: 8px 8px 24px #b8bac0, -8px -8px 24px #ffffff;
+    border: none !important;
+    color: #23272f !important;
+    transition: box-shadow 0.3s, background 0.3s;
+}
+body.neumorphic-3d .neumorphic-inset {
+    box-shadow: inset 8px 8px 24px #b8bac0, inset -8px -8px 24px #ffffff !important;
+}
+body.neumorphic-3d .btn-primary {
+    background: linear-gradient(90deg, #cc0044 60%, #6c63ff 100%) !important;
+    color: #fff !important;
+    box-shadow: 4px 4px 16px #b8bac0, -4px -4px 16px #ffffff !important;
+}
+body.neumorphic-3d .btn-secondary,
+body.neumorphic-3d .btn-danger {
+    background: #e0e5ec !important;
+    color: #23272f !important;
+}
+body.neumorphic-3d .tool-btn {
+    background: #e0e5ec !important;
+    color: #cc0044 !important;
+    box-shadow: 4px 4px 16px #b8bac0, -4px -4px 16px #ffffff !important;
+}
+body.neumorphic-3d .tool-btn.active,
+body.neumorphic-3d .tool-btn:active {
+    color: #6c63ff !important;
+}
+body.neumorphic-3d .neumorphic-outset-interactive:hover,
+body.neumorphic-3d .tool-btn:hover {
+    box-shadow: 2px 2px 8px #b8bac0, -2px -2px 8px #ffffff !important;
+    background: #f5f6fa !important;
+}
+body.neumorphic-3d .neumorphic-outset-interactive:active,
+body.neumorphic-3d .tool-btn:active {
+    box-shadow: inset 2px 2px 8px #b8bac0, inset -2px -2px 8px #ffffff !important;
+}
+body.neumorphic-3d #theme-toggle,
+body.neumorphic-3d #neumorphic-toggle {
+    background: #e0e5ec !important;
+    box-shadow: 2px 2px 8px #b8bac0, -2px -2px 8px #ffffff !important;
+}
+body.neumorphic-3d #theme-toggle:active,
+body.neumorphic-3d #neumorphic-toggle:active {
+    box-shadow: inset 2px 2px 8px #b8bac0, inset -2px -2px 8px #ffffff !important;
+}
+
+/* --- DARK MODE 3D NEUMORPHIC --- */
+body.neumorphic-3d.dark-mode {
+    background: #23242a !important;
+    color: #f3f4f6 !important;
+}
+body.neumorphic-3d.dark-mode .glassmorph,
+body.neumorphic-3d.dark-mode .neumorphic-outset,
+body.neumorphic-3d.dark-mode .neumorphic-inset,
+body.neumorphic-3d.dark-mode .btn,
+body.neumorphic-3d.dark-mode .custom-select,
+body.neumorphic-3d.dark-mode textarea,
+body.neumorphic-3d.dark-mode input[type="text"],
+body.neumorphic-3d.dark-mode input[type="number"] {
+    background: #23242a !important;
+    border-radius: 18px !important;
+    box-shadow: 8px 8px 24px #18191f, -8px -8px 24px #2e2f36;
+    border: none !important;
+    color: #f3f4f6 !important;
+    transition: box-shadow 0.3s, background 0.3s;
+}
+body.neumorphic-3d.dark-mode .neumorphic-inset {
+    box-shadow: inset 8px 8px 24px #18191f, inset -8px -8px 24px #2e2f36 !important;
+}
+body.neumorphic-3d.dark-mode .btn-primary {
+    background: linear-gradient(90deg, #cc0044 60%, #6c63ff 100%) !important;
+    color: #fff !important;
+    box-shadow: 4px 4px 16px #18191f, -4px -4px 16px #2e2f36 !important;
+}
+body.neumorphic-3d.dark-mode .btn-secondary,
+body.neumorphic-3d.dark-mode .btn-danger {
+    background: #23242a !important;
+    color: #f3f4f6 !important;
+}
+body.neumorphic-3d.dark-mode .tool-btn {
+    background: #23242a !important;
+    color: #cc0044 !important;
+    box-shadow: 4px 4px 16px #18191f, -4px -4px 16px #2e2f36 !important;
+}
+body.neumorphic-3d.dark-mode .tool-btn.active,
+body.neumorphic-3d.dark-mode .tool-btn:active {
+    color: #6c63ff !important;
+}
+body.neumorphic-3d.dark-mode .neumorphic-outset-interactive:hover,
+body.neumorphic-3d.dark-mode .tool-btn:hover {
+    box-shadow: 2px 2px 8px #18191f, -2px -2px 8px #2e2f36 !important;
+    background: #292a31 !important;
+}
+body.neumorphic-3d.dark-mode .neumorphic-outset-interactive:active,
+body.neumorphic-3d.dark-mode .tool-btn:active {
+    box-shadow: inset 2px 2px 8px #18191f, inset -2px -2px 8px #2e2f36 !important;
+}
+body.neumorphic-3d.dark-mode #theme-toggle,
+body.neumorphic-3d.dark-mode #neumorphic-toggle {
+    background: #23242a !important;
+    box-shadow: 2px 2px 8px #18191f, -2px -2px 8px #2e2f36 !important;
+}
+body.neumorphic-3d.dark-mode #theme-toggle:active,
+body.neumorphic-3d.dark-mode #neumorphic-toggle:active {
+    box-shadow: inset 2px 2px 8px #18191f, inset -2px -2px 8px #2e2f36 !important;
+}
+
+/* Text color logic for light/dark/3d modes */
+.ai-text-color {
+    color: #23272f;
+    transition: color 0.3s;
+}
+body.dark-mode .ai-text-color,
+body.neumorphic-3d.dark-mode .ai-text-color {
+    color: #f3f4f6;
+}
+body.neumorphic-3d .ai-text-color {
+    color: #23272f;
+}

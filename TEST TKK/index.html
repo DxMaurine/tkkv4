@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TKK IMAGEN - AI Image Generator</title>
+
+    <!-- Tailwind CSS for rapid, responsive UI development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons for a clean icon set -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Custom JavaScript -->
+    <script src="js/script.js" defer></script>
+    
+
+
+    
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- HEADER -->
+    <!-- BOTTOM NAVIGATION BAR (Glassmorphism, Midjourney-style, Floating & Rounded) -->
+    <nav class="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 bg-white/30 dark:bg-black/30 backdrop-blur-md border border-white/20 dark:border-black/30 rounded-2xl w-[95vw] max-w-lg mx-auto flex items-center shadow-sm md:shadow-md"
+        style="box-shadow: 0 2px 8px 0 rgba(31,38,135,0.10); min-height: 72px;">
+        <div class="flex justify-between items-center w-full px-2 py-2 sm:px-6">
+           <!-- Home / Generate -->
+           <button id="nav-generate" class="flex flex-col items-center justify-center flex-1 px-2 py-2 group focus:outline-none">
+              <i class="ph-fill ph-image-square text-3xl text-indigo-500 group-hover:text-indigo-700"></i>
+              <span class="text-xs mt-1 text-gray-700 dark:text-gray-200 group-hover:text-indigo-700 font-semibold">Generate</span>
+           </button>
+           <!-- History -->
+           <button id="nav-history" class="flex flex-col items-center justify-center flex-1 px-2 py-2 group focus:outline-none">
+              <i class="ph-fill ph-clock-counter-clockwise text-3xl text-amber-500 group-hover:text-amber-600"></i>
+              <span class="text-xs mt-1 text-gray-700 dark:text-gray-200 group-hover:text-amber-700 font-semibold">History</span>
+           </button>
+           <!-- Tools -->
+           <button id="nav-tools" class="flex flex-col items-center justify-center flex-1 px-2 py-2 group focus:outline-none">
+              <i class="ph-fill ph-magic-wand text-3xl text-emerald-500 group-hover:text-emerald-700"></i>
+              <span class="text-xs mt-1 text-gray-700 dark:text-gray-200 group-hover:text-emerald-700 font-semibold">Tools</span>
+           </button>
+           <!-- Community -->
+           <a href="https://www.facebook.com/groups/407347088866675" target="_blank" class="flex flex-col items-center justify-center flex-1 px-2 py-2 group focus:outline-none">
+              <i class="ph-fill ph-users-three text-3xl text-blue-500 group-hover:text-blue-700"></i>
+              <span class="text-xs mt-1 text-gray-700 dark:text-gray-200 group-hover:text-blue-700 font-semibold">Komunitas</span>
+           </a>
+           <!-- Profile/Login -->
+           <button id="nav-login" class="flex flex-col items-center justify-center flex-1 px-2 py-2 group focus:outline-none">
+              <i class="ph-fill ph-user-circle text-3xl text-gray-500 group-hover:text-indigo-700"></i>
+              <span class="text-xs mt-1 text-gray-700 dark:text-gray-200 group-hover:text-indigo-700 font-semibold">Login</span>
+           </button>
+           <!-- Setting Button -->
+           <button id="nav-setting" class="flex flex-col items-center justify-center flex-1 px-2 py-2 group focus:outline-none">
+              <i class="ph-fill ph-gear text-3xl text-gray-500 group-hover:text-indigo-700"></i>
+              <span class="text-xs mt-1 text-gray-700 dark:text-gray-200 group-hover:text-indigo-700 font-semibold">Setting</span>
+           </button>
+        </div>
+    </nav>
+    <script>
+    // Bottom Navigation Bar Functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        // Scroll to Generate/Main Section
+        document.getElementById('nav-generate').addEventListener('click', function () {
+            document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Scroll to History Section
+        document.getElementById('nav-history').addEventListener('click', function () {
+            const historySection = document.querySelector('#history-container');
+            if (historySection) {
+                historySection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // Scroll to Tools Section
+        document.getElementById('nav-tools').addEventListener('click', function () {
+            const toolsSection = document.querySelector('section:has(#advanced-tools-container)');
+            if (toolsSection) {
+                toolsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // Show Setting Modal
+        document.getElementById('nav-setting').addEventListener('click', function () {
+            document.getElementById('setting-modal').classList.remove('hidden');
+        });
+
+        // Close Setting Modal
+        document.getElementById('close-setting-modal').addEventListener('click', function () {
+            document.getElementById('setting-modal').classList.add('hidden');
+        });
+
+        // Optional: close modal if click outside content
+        document.getElementById('setting-modal').addEventListener('click', function (e) {
+            if (e.target === this) {
+            this.classList.add('hidden');
+            }
+        });
+
+        // Show Login/Profile Modal (global notif)
+        document.getElementById('nav-login').addEventListener('click', function () {
+            showGlobalNotif('Fitur login belum tersedia.');
+        });
+
+        // Global Notif function
+        window.showGlobalNotif = function (msg) {
+            let notif = document.getElementById('global-notif');
+            if (!notif) {
+                notif = document.createElement('div');
+                notif.id = 'global-notif';
+                notif.className = 'fixed top-6 left-1/2 -translate-x-1/2 z-[99999] bg-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg font-semibold text-center transition-all duration-300 opacity-0 pointer-events-none';
+                document.body.appendChild(notif);
+            }
+            notif.textContent = msg;
+            notif.classList.remove('opacity-0', 'pointer-events-none');
+            notif.classList.add('opacity-100');
+            setTimeout(() => {
+                notif.classList.remove('opacity-100');
+                notif.classList.add('opacity-0');
+            }, 2200);
+        };
+    });
+    </script>
+    
+    <!-- Setting Popup Modal -->
+    <div id="setting-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div id="setting-modal-content" class="glassmorph neumorphic-outset max-w-sm w-full p-6 rounded-2xl relative text-center">
+            <button id="close-setting-modal" class="absolute top-3 right-3 p-2 rounded-full neumorphic-outset-interactive">
+                <i class="ph-fill ph-x"></i>
+            </button>
+            <div class="flex items-center justify-center gap-3 mb-4 relative">
+                <!-- Admin Panel Button (Gear Icon) -->
+                <button id="admin-panel-btn" class="p-2 rounded-full neumorphic-outset-interactive hover:bg-indigo-100 transition absolute left-0 top-1/2 -translate-y-1/2" title="Panel Admin" style="min-width:40px;min-height:40px;">
+                    <i class="ph-fill ph-gear-six text-indigo-700 text-2xl"></i>
+                </button>
+                <div class="flex-1 flex justify-center">
+                    <h3 class="text-xl font-bold flex items-center gap-1">
+                        <i class="ph-fill text-indigo-500"></i>
+                        Setting
+                    </h3>
+                </div>
+            </div>
+            <!-- Admin Panel Popup -->
+            <div id="admin-panel-popup" class="hidden fixed inset-0 z-[99999] flex items-center justify-center bg-black/40">
+                <div class="neumorphic-outset glassmorph p-6 rounded-xl max-w-xs w-full text-center relative">
+                    <button id="close-admin-panel" class="absolute top-3 right-3 p-2 rounded-full neumorphic-outset-interactive">
+                        <i class="ph-fill ph-x"></i>
+                    </button>
+                    <div id="admin-panel-auth">
+                        <h4 class="font-bold mb-2 flex items-center justify-center gap-2">
+                            <i class="ph-fill ph-lock-key text-indigo-500"></i>
+                            Admin Panel
+                        </h4>
+                        <input id="admin-key-input" type="password" class="w-full neumorphic-inset p-2 mb-3 rounded" placeholder="Masukkan Admin Key">
+                        <button id="admin-key-submit" class="btn btn-primary w-full mb-2">Masuk</button>
+                        <div id="admin-key-error" class="text-red-600 text-xs hidden">Admin Key salah.</div>
+                    </div>
+                    <div id="admin-panel-main" class="hidden">
+                        <h4 class="font-bold mb-2 flex items-center justify-center gap-2">
+                            <i class="ph-fill ph-gear-six text-indigo-500"></i>
+                            Panel Admin
+                        </h4>
+                        <div class="text-left text-xs mb-3 space-y-1">
+                            <div><b>User:</b> Dummy User</div>
+                            <div><b>Masa Aktif GEM:</b> <span id="admin-gem-expire"></span></div>
+                            <div><b>Jumlah GEM Sekarang:</b> <span id="admin-gem-count"></span></div>
+                        </div>
+                        <button id="admin-reset-gem-btn" class="btn btn-danger w-full mb-2">Reset Semua GEM ke 50</button>
+                        <div id="admin-reset-confirm" class="hidden mt-2">
+                            <div class="mb-2">Yakin reset semua GEM ke 50?</div>
+                            <div class="flex gap-2 justify-center">
+                                <button id="admin-reset-yes" class="btn btn-primary flex-1">Ya</button>
+                                <button id="admin-reset-no" class="btn btn-secondary flex-1">Tidak</button>
+                            </div>
+                        </div>
+                        <div id="admin-reset-info" class="text-green-600 text-xs mt-2 hidden">Semua GEM berhasil direset ke 50.</div>
+                    </div>
+                </div>
+            </div>
+            <script>
+            // --- Admin Panel Logic ---
+            (function() {
+                const ADMIN_KEY = "TKK-ADMIN-KEY-123";
+                const adminBtn = document.getElementById('admin-panel-btn');
+                const popup = document.getElementById('admin-panel-popup');
+                const closeBtn = document.getElementById('close-admin-panel');
+                const authDiv = document.getElementById('admin-panel-auth');
+                const mainDiv = document.getElementById('admin-panel-main');
+                const keyInput = document.getElementById('admin-key-input');
+                const keySubmit = document.getElementById('admin-key-submit');
+                const keyError = document.getElementById('admin-key-error');
+                const gemExpire = document.getElementById('admin-gem-expire');
+                const gemCount = document.getElementById('admin-gem-count');
+                const resetBtn = document.getElementById('admin-reset-gem-btn');
+                const resetConfirm = document.getElementById('admin-reset-confirm');
+                const resetYes = document.getElementById('admin-reset-yes');
+                const resetNo = document.getElementById('admin-reset-no');
+                const resetInfo = document.getElementById('admin-reset-info');
+
+                // Helper: get masa aktif GEM Key (API Key)
+                function getApiKeyExpireInfo() {
+                    const apiKey = localStorage.getItem('tkk_apikey');
+                    const apiKeyExpire = localStorage.getItem('tkk_apikey_expire');
+                    if (apiKey && apiKeyExpire) {
+                        const expireDate = new Date(parseInt(apiKeyExpire));
+                        return `GEM Key aktif, kadaluarsa: ${expireDate.toLocaleString()}`;
+                    }
+                    return 'Tidak ada GEM Key aktif';
+                }
+
+                // Helper: update masa aktif di panel setting (timer di bawah input API Key)
+                function updateApiKeyTimerPanel() {
+                    const timerDiv = document.getElementById('api-key-timer');
+                    if (timerDiv) {
+                        timerDiv.textContent = "";
+                        timerDiv.classList.add('hidden');
+                        // Clear interval if any
+                        if (timerDiv._interval) {
+                            clearInterval(timerDiv._interval);
+                            timerDiv._interval = null;
+                        }
+                    }
+                }
+
+                // Show popup
+                adminBtn.onclick = function() {
+                    popup.classList.remove('hidden');
+                    authDiv.classList.remove('hidden');
+                    mainDiv.classList.add('hidden');
+                    keyInput.value = "";
+                    keyError.classList.add('hidden');
+                    resetConfirm.classList.add('hidden');
+                    resetInfo.classList.add('hidden');
+                };
+                // Close popup
+                closeBtn.onclick = function() {
+                    popup.classList.add('hidden');
+                };
+                // Auth submit
+                keySubmit.onclick = function() {
+                    if (keyInput.value.trim() === ADMIN_KEY) {
+                        authDiv.classList.add('hidden');
+                        mainDiv.classList.remove('hidden');
+                        keyError.classList.add('hidden');
+                        // Show dummy user info
+                        gemCount.textContent = window.gemManager ? window.gemManager.getGem() : '50';
+                        // Show masa aktif GEM (from localStorage)
+                        const expire = localStorage.getItem('tkk_gem_last_reset');
+                        gemExpire.innerHTML = (expire ? expire : 'Tidak ada') + "<br>" + getApiKeyExpireInfo();
+                        resetConfirm.classList.add('hidden');
+                        resetInfo.classList.add('hidden');
+                    } else {
+                        keyError.classList.remove('hidden');
+                    }
+                };
+                // Reset GEM button
+                resetBtn.onclick = function() {
+                    resetConfirm.classList.remove('hidden');
+                    resetInfo.classList.add('hidden');
+                };
+                // Confirm reset
+                resetYes.onclick = function() {
+                    // Reset GEM count and last reset
+                    if (window.gemManager) {
+                        window.gemManager.setGem(50);
+                        window.gemManager.setLastReset(new Date().toISOString().slice(0, 10));
+                        gemCount.textContent = window.gemManager.getGem();
+                        gemExpire.innerHTML = window.gemManager.getLastReset() + "<br>" + getApiKeyExpireInfo();
+                    }
+                    // Hapus masa aktif GEM Key (API Key) apapun kondisinya
+                    localStorage.removeItem('tkk_apikey');
+                    localStorage.removeItem('tkk_apikey_used');
+                    localStorage.removeItem('tkk_apikey_expire');
+                    // Reset lock IP dan semua kunci terkait GEM ke default
+                    localStorage.removeItem('tkk_gem_lock_ip');
+                    localStorage.removeItem('tkk_gem_last_reset');
+                    // Update masa aktif di panel setting juga
+                    updateApiKeyTimerPanel();
+                    // Info update
+                    gemExpire.innerHTML = (window.gemManager ? window.gemManager.getLastReset() : '') + "<br>" + getApiKeyExpireInfo();
+                    resetConfirm.classList.add('hidden');
+                    resetInfo.classList.remove('hidden');
+                };
+                // Cancel reset
+                resetNo.onclick = function() {
+                    resetConfirm.classList.add('hidden');
+                };
+                // Close popup when clicking outside
+                popup.addEventListener('click', function(e) {
+                    if (e.target === popup) popup.classList.add('hidden');
+                });
+            })();
+            </script>
+            <!-- Accent View Color -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="font-medium">Accent View Color</span>
+                    <input id="accent-color-picker" type="color" value="#cc0044" class="w-8 h-8 rounded border-2 border-gray-300 neumorphic-inset ml-2" style="padding:0;">
+                    <button id="accent-undo-btn" title="Undo" class="ml-2 p-1 rounded-full neumorphic-outset-interactive text-xs"><i class="ph-fill ph-arrow-counter-clockwise"></i></button>
+                </div>
+                <label class="inline-flex items-center cursor-pointer relative">
+                    <input type="checkbox" id="accent-toggle" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 rounded-full transition-colors duration-300 peer-checked:bg-indigo-500"></div>
+                    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5"></div>
+                </label>
+            </div>
+            <!-- Reset All Setting -->
+            <div class="flex items-center justify-between mb-4">
+                <span class="font-medium">Reset All Setting</span>
+                <label class="inline-flex items-center cursor-pointer relative">
+                    <input type="checkbox" id="reset-toggle" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 rounded-full transition-colors duration-300 peer-checked:bg-red-500"></div>
+                    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-5"></div>
+                </label>
+            </div>
+           
+            <!-- API KEY -->
+            <div class="flex flex-col gap-2 mb-4">
+                <label for="api-key-input" class="font-medium text-left mb-1">Gem Key logic</label>
+                <div class="flex items-center gap-2">
+                    <input id="api-key-input" type="text" class="neumorphic-inset p-2 text-sm w-full rounded-lg" placeholder="Tempel GEM Key Anda di sini...">
+                    <button id="paste-api-key-btn" type="button" title="Paste API Key" class="p-2 rounded-full neumorphic-outset-interactive text-gray-500 hover:text-indigo-600 transition">
+                        <i class="ph-fill ph-cards"></i>
+                    </button>
+                    <button id="reset-api-key-btn" type="button" title="Hapus API Key" class="p-2 rounded-full neumorphic-outset-interactive text-gray-500 hover:text-red-600 transition">
+                        <i class="ph-fill ph-arrow-counter-clockwise"></i>
+                    </button>
+                </div>
+                <button id="save-api-key-btn" class="btn btn-primary w-full text-sm mt-2 flex items-center justify-center gap-2 rounded-lg">
+                    <i class="ph-fill ph-check"></i>
+                    Validasi & Simpan
+                </button>
+                <!-- Notice: API Key Logic Info -->
+                <div id="api-key-notice" class="mt-3 mb-2 px-4 py-3 rounded-xl neumorphic-inset glassmorph border border-indigo-200/60 bg-gradient-to-br from-indigo-50/80 to-white/80 shadow flex items-center gap-3 text-left">
+                    <i class="ph-fill ph-info text-indigo-500 text-2xl flex-shrink-0"></i>
+                    <div class="flex-1 text-xs sm:text-sm text-gray-700 leading-relaxed">
+                        <b>GEM Key hanya bisa dipakai <span class="text-indigo-600">sekali</span> di 1 perangkat/browser.</b>
+                        <br>
+                        Aktif selama <b>5 hari</b>, lalu kadaluarsa otomatis.
+                        <br>
+                        <span class="text-green-600 font-semibold">+10 GEM</span> langsung ditambahkan jika valid.
+                        <br>
+                        <span class="text-green-600 font-semibold">
+                            Belum punya GEMKey? 
+                            <a href="https://www.facebook.com/groups/407347088866675" target="_blank" class="underline hover:text-blue-800">Hub Admin FB</a>
+                        </span>
+                    </div>
+                </div>
+                <!-- Spacer for timer -->
+                <div style="height: 18px;"></div>
+                <div id="api-key-timer" class="text-xs text-gray-500 mt-1 text-center hidden"></div>
+            </div>
+            <script>
+            // --- API KEY LOGIC (One-Time Use, Voucher-Style) ---
+            (function() {
+                const VALID_API_KEY = "TKK-TEST-APIKEY-3234986";
+                const API_KEY_STORAGE = "tkk_apikey";
+                const API_KEY_USED = "tkk_apikey_used";
+                const API_KEY_EXPIRE = "tkk_apikey_expire";
+                const API_KEY_GEM_BONUS = 10;
+                const API_KEY_DAYS = 5;
+                const API_KEY_GLOBAL_USED = "tkk_apikey_global_used"; // Global blacklist
+                const API_KEY_LAST_EXPIRE = "tkk_apikey_last_expire";
+
+                const input = document.getElementById('api-key-input');
+                const saveBtn = document.getElementById('save-api-key-btn');
+                const resetBtn = document.getElementById('reset-api-key-btn');
+                const pasteBtn = document.getElementById('paste-api-key-btn');
+                const timerDiv = document.getElementById('api-key-timer');
+
+                // Helper: get/set global used keys (in localStorage, comma separated)
+                function getGlobalUsedKeys() {
+                    const raw = localStorage.getItem(API_KEY_GLOBAL_USED);
+                    if (!raw) return [];
+                    try {
+                        return JSON.parse(raw);
+                    } catch {
+                        return [];
+                    }
+                }
+                function addGlobalUsedKey(key) {
+                    const arr = getGlobalUsedKeys();
+                    if (!arr.includes(key)) {
+                        arr.push(key);
+                        localStorage.setItem(API_KEY_GLOBAL_USED, JSON.stringify(arr));
+                    }
+                }
+                function isGlobalUsed(key) {
+                    return getGlobalUsedKeys().includes(key);
+                }
+
+                function setBtnState(valid) {
+                    if (valid) {
+                        saveBtn.classList.remove('btn-primary');
+                        saveBtn.classList.add('btn-success', 'opacity-70', 'cursor-not-allowed');
+                        saveBtn.disabled = true;
+                        saveBtn.innerHTML = '<i class="ph-fill ph-check"></i> API Key Aktif';
+                    } else {
+                        saveBtn.classList.remove('btn-success', 'opacity-70', 'cursor-not-allowed');
+                        saveBtn.classList.add('btn-primary');
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = '<i class="ph-fill ph-check"></i> Validasi & Simpan';
+                    }
+                }
+
+                function showTimer(expire) {
+                    if (!expire) {
+                        timerDiv.classList.add('hidden');
+                        return;
+                    }
+                    function update() {
+                        const now = Date.now();
+                        const left = expire - now;
+                        if (left <= 0) {
+                            timerDiv.textContent = "API Key sudah kadaluarsa.";
+                            timerDiv.classList.remove('text-green-600');
+                            timerDiv.classList.add('text-red-600');
+                            setBtnState(false);
+                            // Don't remove last expire, keep for notification
+                            localStorage.removeItem(API_KEY_STORAGE);
+                            localStorage.removeItem(API_KEY_USED);
+                            localStorage.removeItem(API_KEY_EXPIRE);
+                            input.value = "";
+                            return;
+                        }
+                        const days = Math.floor(left / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((left % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((left % (1000 * 60 * 60)) / (1000 * 60));
+                        timerDiv.textContent = `Masa aktif API Key: ${days} hari, ${hours} jam, ${minutes} menit`;
+                        timerDiv.classList.remove('hidden', 'text-red-600');
+                        timerDiv.classList.add('text-green-600');
+                    }
+                    update();
+                    timerDiv._interval && clearInterval(timerDiv._interval);
+                    timerDiv._interval = setInterval(update, 60000);
+                }
+
+                function isUsed() {
+                    // Used in this browser
+                    return localStorage.getItem(API_KEY_USED) === "1";
+                }
+
+                function isValidKey(key) {
+                    return key === VALID_API_KEY;
+                }
+
+                function saveKey(key) {
+                    localStorage.setItem(API_KEY_STORAGE, key);
+                    localStorage.setItem(API_KEY_USED, "1");
+                    const expire = Date.now() + API_KEY_DAYS * 24 * 60 * 60 * 1000;
+                    localStorage.setItem(API_KEY_EXPIRE, expire);
+                    localStorage.setItem(API_KEY_LAST_EXPIRE, expire); // Save last expire for notification
+                    addGlobalUsedKey(key); // Mark as globally used
+                    showTimer(expire);
+                }
+
+                function resetKey() {
+                    // Only remove key, used, expire, but keep last expire for notification
+                    localStorage.removeItem(API_KEY_STORAGE);
+                    localStorage.removeItem(API_KEY_USED);
+                    localStorage.removeItem(API_KEY_EXPIRE);
+                    setBtnState(false);
+                    input.value = "";
+                    // Show timer if last expire still valid
+                    const lastExpire = parseInt(localStorage.getItem(API_KEY_LAST_EXPIRE));
+                    if (lastExpire && lastExpire > Date.now()) {
+                        showTimer(lastExpire);
+                    } else {
+                        timerDiv.classList.add('hidden');
+                    }
+                }
+
+                function addGemBonus() {
+                    if (window.gemManager) {
+                        window.gemManager.add(API_KEY_GEM_BONUS);
+                    }
+                }
+
+                // On load, check if key is active or if last expire is still valid
+                document.addEventListener('DOMContentLoaded', function() {
+                    const stored = localStorage.getItem(API_KEY_STORAGE);
+                    const expire = parseInt(localStorage.getItem(API_KEY_EXPIRE));
+                    const lastExpire = parseInt(localStorage.getItem(API_KEY_LAST_EXPIRE));
+                    if (stored && expire && expire > Date.now() && !isGlobalUsed(stored)) {
+                        input.value = stored;
+                        setBtnState(true);
+                        showTimer(expire);
+                    } else if (lastExpire && lastExpire > Date.now()) {
+                        // Key was deleted but last expire still valid, show timer
+                        setBtnState(false);
+                        showTimer(lastExpire);
+                    } else {
+                        // If key is globally used, force reset
+                        if (stored && isGlobalUsed(stored)) {
+                            resetKey();
+                        }
+                        setBtnState(false);
+                        timerDiv.classList.add('hidden');
+                    }
+                });
+
+                saveBtn.onclick = function(e) {
+                    e.preventDefault();
+                    const key = input.value.trim();
+                    if (!key) {
+                        window.showGlobalNotif && window.showGlobalNotif("Masukkan GEM Key terlebih dahulu.");
+                        return;
+                    }
+                    if (isGlobalUsed(key)) {
+                        window.showGlobalNotif && window.showGlobalNotif("GEM Key sudah pernah digunakan.");
+                        setBtnState(false);
+                        input.value = "";
+                        return;
+                    }
+                    if (isValidKey(key)) {
+                        saveKey(key);
+                        setBtnState(true);
+                        addGemBonus();
+                        window.showGlobalNotif && window.showGlobalNotif("GEM Key valid! 10 GEM ditambahkan.");
+                    } else {
+                        window.showGlobalNotif && window.showGlobalNotif("GEM Key tidak valid.");
+                    }
+                };
+
+                resetBtn.onclick = function() {
+                    resetKey();
+                    window.showGlobalNotif && window.showGlobalNotif("GEM Key direset.");
+                };
+
+                pasteBtn.onclick = async function() {
+                    if (navigator.clipboard) {
+                        try {
+                            const text = await navigator.clipboard.readText();
+                            input.value = text;
+                        } catch {}
+                    }
+                };
+            })();
+
+            // --- GEM RESET EXCEPTION FOR API KEY USERS ---
+            (function() {
+                // Patch GemManager.resetGemIfNeeded to skip reset if user has valid API key
+                const API_KEY_STORAGE = "tkk_apikey";
+                const API_KEY_EXPIRE = "tkk_apikey_expire";
+                const API_KEY_GLOBAL_USED = "tkk_apikey_global_used";
+                function getGlobalUsedKeys() {
+                    const raw = localStorage.getItem(API_KEY_GLOBAL_USED);
+                    if (!raw) return [];
+                    try {
+                        return JSON.parse(raw);
+                    } catch {
+                        return [];
+                    }
+                }
+                function isGlobalUsed(key) {
+                    return getGlobalUsedKeys().includes(key);
+                }
+                function hasValidApiKey() {
+                    const key = localStorage.getItem(API_KEY_STORAGE);
+                    const expire = parseInt(localStorage.getItem(API_KEY_EXPIRE));
+                    if (!key || !expire) return false;
+                    if (isGlobalUsed(key)) return false;
+                    return expire > Date.now();
+                }
+                if (window.gemManager && window.gemManager.resetGemIfNeeded) {
+                    const origReset = window.gemManager.resetGemIfNeeded.bind(window.gemManager);
+                    window.gemManager.resetGemIfNeeded = function() {
+                        if (hasValidApiKey()) {
+                            // Do not reset GEM if user has valid API key
+                            return;
+                        }
+                        origReset();
+                    };
+                }
+            })();
+            </script>
+           
+        </div>
+        <!-- Minimal Confirm Dialog for Reset -->
+        <div id="reset-confirm-modal" class="hidden fixed inset-0 z-60 flex items-center justify-center bg-black/40">
+            <div class="glassmorph neumorphic-outset p-6 rounded-xl max-w-xs w-full text-center">
+                <h4 class="font-bold mb-2">Reset Semua Pengaturan?</h4>
+                <p class="text-sm text-gray-600 mb-4">Semua pengaturan akan dikembalikan ke default.</p>
+                <div class="flex gap-4 justify-center">
+                    <button id="reset-confirm-yes" class="btn btn-danger flex-1">Ya</button>
+                    <button id="reset-confirm-no" class="btn btn-secondary flex-1">Tidak</button>
+                </div>
+            </div>
+        </div>
+       
+    </div>
+   
+           
+    <!-- THEME SWITCHER & DONATION -->
+    <div class="container mx-auto px-2 sm:px-0 py-0">
+        <div class="neumorphic-outset rounded-lg flex items-center justify-between p-2 gap-4">
+            <div class="flex items-center gap-2">
+                <button id="donation-btn" class="btn btn-primary flex-shrink-0 rounded-full px-2 py-1 text-xs max-w-[60px] h-7 flex items-center justify-center ">
+                    <i class="ph-fill ph-heart mr-1 text-base"></i>
+                    <span></span>
+                </button>
+                <!-- GEM BADGE -->
+                <button id="gem-badge" class="ml-2 flex items-center gap-1 px-3 py-1 rounded-full neumorphic-outset-interactive bg-cyan-100 text-cyan-700 font-bold text-sm border border-cyan-300 hover:bg-cyan-200 transition" title="GEM: Mata uang AI">
+                    <i class="ph-fill ph-diamond text-cyan-500"></i>
+                    <span id="gem-count">50</span>
+                    <span class="ml-1 flex items-center gap-1">
+                        GEM
+                        <i class="ph-fill ph-lightning text-yellow-400"></i>
+                    </span>
+                </button>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="neumorphic-toggle" class="neumorphic-outset-interactive p-2 rounded-full flex-shrink-0 flex items-center gap-2 px-3" title="3D Neumorphic Mode">
+                    <i id="neumorphic-icon" class="ph ph-cube text-xl text-gray-500"></i>
+                    <span id="neumorphic-text" class="text-sm font-medium hidden sm:inline">3D Mode</span>
+                </button>
+                <button id="theme-toggle" class="neumorphic-outset-interactive p-2 rounded-full flex-shrink-0 flex items-center gap-2 px-3">
+                    <i id="theme-icon" class="ph ph-sun text-xl text-amber-500"></i>
+                    <span id="theme-text" class="text-sm font-medium hidden sm:inline">Light Mode</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- GEM POPUP MODAL -->
+    <div id="gem-popup-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="neumorphic-outset p-6 max-w-xs w-full text-center relative">
+            <button id="close-gem-popup" class="absolute top-3 right-3 p-2 rounded-full neumorphic-outset-interactive">
+                <i class="ph-fill ph-x"></i>
+            </button>
+            <i class="ph-fill ph-diamond text-4xl text-cyan-500 mb-2"></i>
+            <h3 class="text-xl font-bold mb-2">GEM Habis</h3>
+            <p class="text-sm text-gray-600 mb-4">GEM Anda tidak cukup untuk membuat gambar.<br>Silakan isi ulang GEM dengan Donasi atau API Key.</p>
+            <div class="flex gap-4">
+                <button id="gem-topup-donation" class="btn btn-primary text-sm w-1/2">Donasi</button>
+                <button id="gem-topup-apikey" class="btn btn-secondary text-sm w-1/2">API Key</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // --- GEM SYSTEM LOGIC ---
+        class GemManager {
+            constructor() {
+                this.gemKey = 'tkk_gem_count';
+                this.defaultGem = 50;
+                this.lockKey = 'tkk_gem_lock_ip';
+                this.lastResetKey = 'tkk_gem_last_reset';
+                this.init();
+            }
+            async getUserIP() {
+                // Use a public IP API (fallback to localStorage if failed)
+                try {
+                    const res = await fetch('https://api.ipify.org?format=json');
+                    const data = await res.json();
+                    return data.ip;
+                } catch {
+                    return 'local';
+                }
+            }
+            getGem() {
+                let gem = parseInt(localStorage.getItem(this.gemKey));
+                if (isNaN(gem)) gem = this.defaultGem;
+                return gem;
+            }
+            setGem(val) {
+                localStorage.setItem(this.gemKey, val);
+                document.getElementById('gem-count').textContent = val;
+            }
+            async lockReload() {
+                const ip = await this.getUserIP();
+                localStorage.setItem(this.lockKey, ip);
+            }
+            async isReloaded() {
+                const ip = await this.getUserIP();
+                return localStorage.getItem(this.lockKey) === ip;
+            }
+            getLastReset() {
+                return localStorage.getItem(this.lastResetKey);
+            }
+            setLastReset(dateStr) {
+                localStorage.setItem(this.lastResetKey, dateStr);
+            }
+            isNewDay() {
+                const last = this.getLastReset();
+                const today = new Date();
+                const todayStr = today.toISOString().slice(0, 10);
+                return last !== todayStr;
+            }
+            resetGemIfNeeded() {
+                if (this.isNewDay()) {
+                    this.setGem(this.defaultGem);
+                    const todayStr = new Date().toISOString().slice(0, 10);
+                    this.setLastReset(todayStr);
+                }
+            }
+            async init() {
+                // Reset gem if new day
+                this.resetGemIfNeeded();
+                // On first load, set default gem if not set
+                if (localStorage.getItem(this.gemKey) === null) {
+                    this.setGem(this.defaultGem);
+                } else {
+                    this.setGem(this.getGem());
+                }
+                // Lock reload by IP
+                if (!(await this.isReloaded())) {
+                    this.lockReload();
+                }
+                // Update badge on load
+                document.getElementById('gem-count').textContent = this.getGem();
+            }
+            canSpend(cost) {
+                return this.getGem() >= cost;
+            }
+            spend(cost) {
+                let gem = this.getGem();
+                if (gem >= cost) {
+                    this.setGem(gem - cost);
+                    return true;
+                }
+                return false;
+            }
+            add(amount) {
+                this.setGem(this.getGem() + amount);
+            }
+            reset() {
+                this.setGem(this.defaultGem);
+                const todayStr = new Date().toISOString().slice(0, 10);
+                this.setLastReset(todayStr);
+            }
+        }
+        // --- INIT GEM MANAGER ---
+        window.gemManager = new GemManager();
+        // --- GEM BADGE CLICK: Show info or topup ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const gemBadge = document.getElementById('gem-badge');
+            gemBadge.addEventListener('click', () => {
+                // Show info modal with GEM info (styled, line by line)
+                document.getElementById('info-modal-title').textContent = 'Tentang GEM';
+                document.getElementById('info-modal-message').innerHTML = `
+                    <div class="text-left space-y-2">
+                        <div class="flex items-center gap-2">
+                            <i class="ph-fill ph-diamond text-cyan-500 text-lg"></i>
+                            <span><b>GEM</b> adalah mata uang untuk membuat gambar AI.</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="ph-fill ph-image text-indigo-500 text-lg"></i>
+                            <span>Setiap <b>1 gambar</b> membutuhkan <b>2 GEM</b>.</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="ph-fill ph-arrow-clockwise text-green-500 text-lg"></i>
+                            <span>GEM akan <b>direset ke 50</b> setiap 24 jam.</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="ph-fill ph-heart text-pink-500 text-lg"></i>
+                            <span>Isi ulang GEM dengan <b>Donasi</b> atau <b>GEM Key</b> jika habis.</span>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('info-modal').classList.remove('hidden');
+            });
+            // Hook batch select and generate button
+            const batchSelect = document.getElementById('batch-select');
+            const generateBtn = document.getElementById('generate-btn');
+            function updateGemUI() {
+                // Reset gem if new day (in case tab open overnight)
+                window.gemManager.resetGemIfNeeded();
+                const batch = parseInt(batchSelect.value) || 1;
+                const cost = batch * 2;
+                if (!window.gemManager.canSpend(cost)) {
+                    generateBtn.disabled = true;
+                    generateBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                } else {
+                    generateBtn.disabled = false;
+                    generateBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+                }
+            }
+            batchSelect.addEventListener('change', updateGemUI);
+            updateGemUI();
+            // On generate click, spend gem
+            generateBtn.addEventListener('click', function(e) {
+                // Reset gem if new day (in case tab open overnight)
+                window.gemManager.resetGemIfNeeded();
+                const batch = parseInt(batchSelect.value) || 1;
+                const cost = batch * 2;
+                if (!window.gemManager.canSpend(cost)) {
+                    e.preventDefault();
+                    showGemPopup();
+                    return false;
+                }
+                if (!window.gemManager.spend(cost)) {
+                    e.preventDefault();
+                    showGemPopup();
+                    return false;
+                }
+                updateGemUI();
+            });
+
+            // Spend GEM for Video Prompt (default 4 GEM per generate)
+            const generateVideoBtn = document.getElementById('generate-video-preview-btn');
+            if (generateVideoBtn) {
+                generateVideoBtn.addEventListener('click', function(e) {
+                    const cost = 4;
+                    window.gemManager.resetGemIfNeeded();
+                    if (!window.gemManager.canSpend(cost)) {
+                        e.preventDefault();
+                        showGemPopup();
+                        return false;
+                    }
+                    if (!window.gemManager.spend(cost)) {
+                        e.preventDefault();
+                        showGemPopup();
+                        return false;
+                    }
+                    updateGemUI();
+                });
+            }
+
+            // Spend GEM for Audio (default 2 GEM per generate)
+            const generateAudioBtn = document.getElementById('generate-audio-btn');
+            if (generateAudioBtn) {
+                generateAudioBtn.addEventListener('click', function(e) {
+                    const cost = 2;
+                    window.gemManager.resetGemIfNeeded();
+                    if (!window.gemManager.canSpend(cost)) {
+                        e.preventDefault();
+                        showGemPopup();
+                        return false;
+                    }
+                    if (!window.gemManager.spend(cost)) {
+                        e.preventDefault();
+                        showGemPopup();
+                        return false;
+                    }
+                    updateGemUI();
+                });
+            }
+
+            // Spend GEM for Enhance (default 2 GEM per enhance)
+            const runEnhanceBtn = document.getElementById('run-enhance-btn');
+            if (runEnhanceBtn) {
+                runEnhanceBtn.addEventListener('click', function(e) {
+                    const cost = 2;
+                    window.gemManager.resetGemIfNeeded();
+                    if (!window.gemManager.canSpend(cost)) {
+                        e.preventDefault();
+                        showGemPopup();
+                        return false;
+                    }
+                    if (!window.gemManager.spend(cost)) {
+                        e.preventDefault();
+                        showGemPopup();
+                        return false;
+                    }
+                    updateGemUI();
+                });
+            }
+
+            // Spend GEM for AI Vision (Image to Prompt, default 2 GEM)
+            const upscaleGenerateBtn = document.getElementById('upscale-generate-btn');
+            if (upscaleGenerateBtn) {
+                upscaleGenerateBtn.addEventListener('click', function(e) {
+                    const cost = 2;
+                    window.gemManager.resetGemIfNeeded();
+                    if (!window.gemManager.canSpend(cost)) {
+                        e.preventDefault();
+                        showGemPopup();
+                        return false;
+                    }
+                    if (!window.gemManager.spend(cost)) {
+                        e.preventDefault();
+                        showGemPopup();
+                        return false;
+                    }
+                    updateGemUI();
+                });
+            }
+
+            // Spend GEM for Watermark (default 1 GEM per download)
+            const downloadWatermarkBtn = document.getElementById('download-watermark-btn');
+            if (downloadWatermarkBtn) {
+                downloadWatermarkBtn.addEventListener('click', function(e) {
+                    const cost = 1;
+                    window.gemManager.resetGemIfNeeded();
+                    if (!window.gemManager.canSpend(cost)) {
+                        e.preventDefault();
+                        showGemPopup();
+                        return false;
+                    }
+                    if (!window.gemManager.spend(cost)) {
+                        e.preventDefault();
+                        showGemPopup();
+                        return false;
+                    }
+                    updateGemUI();
+                });
+            }
+            // Listen for gem changes (for other scripts)
+            window.addEventListener('storage', function(e) {
+                if (e.key === window.gemManager.gemKey) {
+                    document.getElementById('gem-count').textContent = window.gemManager.getGem();
+                    updateGemUI();
+                }
+                if (e.key === window.gemManager.lastResetKey) {
+                    window.gemManager.resetGemIfNeeded();
+                    updateGemUI();
+                }
+            });
+            // GEM Popup logic
+            function showGemPopup() {
+                document.getElementById('gem-popup-modal').classList.remove('hidden');
+            }
+            function closeGemPopup() {
+                document.getElementById('gem-popup-modal').classList.add('hidden');
+            }
+            document.getElementById('close-gem-popup').onclick = closeGemPopup;
+            document.getElementById('gem-topup-donation').onclick = function() {
+                closeGemPopup();
+                document.getElementById('donation-btn').click();
+            };
+            document.getElementById('gem-topup-apikey').onclick = function() {
+                closeGemPopup();
+                document.getElementById('nav-setting').click();
+            };
+            // Optional: check/reset gem every hour in case tab stays open
+            setInterval(() => {
+                window.gemManager.resetGemIfNeeded();
+                updateGemUI();
+            }, 60 * 60 * 1000);
+        });
+    </script>
+    
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-8">
+
+            <!-- Left Column: Controls & Tools -->
+            <div class="flex flex-col space-y-8">
+                <!-- Prompt Section -->
+                <section class="neumorphic-outset p-6">
+                    <h1 class="text-2xl font-bold mb-1 flex items-center gap-2">
+                        <i class="ph-fill ph-magic-wand text-indigo-500 text-2xl"></i>
+                        AI Image Generator
+                        <button id="info-generate-btn" class="ml-auto flex items-center justify-center w-6 h-6 rounded-full neumorphic-outset-interactive transition-colors border border-black/10" style="background: var(--glass-bg); color: var(--primary-color);" title="Informasi">
+                            <i class="ph ph-info text-sm"></i>
+                        </button>
+                    </h1>
+                   
+                    <p class="text-gray-500 mb-4">Where Image Created By AI.</p>
+                    <div class="space-y-4">
+                        <label for="prompt-input" class="font-medium">Masukkan Prompt Anda</label>
+                        <div class="relative">
+                            <textarea id="prompt-input" rows="4" class="w-full p-4 pr-10 text-base neumorphic-inset focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="prompt ide acak dari AI-->"></textarea>
+                            <button id="idea-btn" title="✨ Beri Ide Acak" class="absolute top-3 right-3 p-1 rounded-full hover:bg-white/60 neumorphic-outset-interactive"><i class="ph ph-lightbulb text-xl text-amber-500"></i></button>
+                        </div>
+                        <div class="flex flex-wrap gap-2 justify-center mt-2">
+                            <button id="enhance-btn" class="btn btn-secondary action-btn text-sm px-2 py-2 rounded-lg flex-1 min-w-[80px] max-w-[120px] flex items-center justify-center gap-1">
+                                <i class="ph-fill ph-magic-wand"></i>
+                                <span> Enhance</span>
+                            </button>
+                            <button id="copy-btn" class="btn btn-secondary action-btn text-sm px-2 py-2 rounded-lg flex-1 min-w-[80px] max-w-[120px] flex items-center justify-center gap-1">
+                                <i class="ph-fill ph-copy"></i>
+                                <span>Copy</span>
+                            </button>
+                            <button id="paste-btn" class="btn btn-secondary action-btn text-sm px-2 py-2 rounded-lg flex-1 min-w-[80px] max-w-[120px] flex items-center justify-center gap-1">
+                                <i class="ph-fill ph-clipboard"></i>
+                                <span>Paste</span>
+                            </button>
+                            <button id="clear-btn" class="btn btn-danger action-btn text-sm px-2 py-2 rounded-lg flex-1 min-w-[100px] max-w-[140px] flex items-center justify-center gap-1">
+                                <i class="ph-fill ph-trash"></i>
+                                <span>Clear</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Stock Prompt Accordion -->
+                        <div class="mt-4">
+                          
+                            <button id="stock-prompt-toggle" type="button"
+                                class="w-full flex items-center justify-between p-3 rounded-md neumorphic-outset-interactive glassmorph transition font-semibold text-sm ai-text-color focus:outline-none"
+                                style="background: var(--glass-bg); border: 1.5px solid var(--glass-border);">
+                                <span class="flex items-center gap-2">
+                                    <i class="ph ph-lightbulb text-yellow-500"></i>
+                                    Stock Prompt
+                                </span>
+                                <i id="stock-prompt-arrow" class="ph ph-caret-down text-lg transition-transform"></i>
+                            </button>
+                            <div id="stock-prompt-content"
+                                class="hidden mt-2 neumorphic-inset glassmorph rounded-md p-3 space-y-3"
+                                style="background: var(--glass-bg); border: 1.5px solid var(--glass-border);">
+                                <div class="flex flex-col gap-4">
+                                    <div class="flex flex-col gap-1">
+                                        <div class="font-medium ai-text-color text-xs">
+                                            <b>Prompt:</b> A futuristic city at sunset, neon lights, flying cars, ultra detailed, cinematic<br>
+                                            <span class="text-gray-500">Saran: Tambahkan detail seperti "reflections on glass buildings, bustling crowd, vibrant color palette, atmospheric haze, wide angle view" agar hasil lebih sempurna.</span>
+                                        </div>
+                                        <button class="btn btn-secondary btn-use-stock-prompt text-xs px-3 py-1 flex-shrink-0 self-end mt-1"
+                                            data-prompt="A futuristic city at sunset, neon lights, flying cars, ultra detailed, cinematic, reflections on glass buildings, bustling crowd, vibrant color palette, atmospheric haze, wide angle view">
+                                            <i class="ph-fill ph-arrow-fat-line-right"></i> Use Prompt
+                                        </button>
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <div class="font-medium ai-text-color text-xs">
+                                            <b>Prompt:</b> A majestic lion in a misty forest, hyperrealistic, golden hour lighting<br>
+                                            <span class="text-gray-500">Saran: Tambahkan "soft sunlight rays, dew on grass, detailed fur texture, shallow depth of field, cinematic composition" untuk hasil lebih dramatis.</span>
+                                        </div>
+                                        <button class="btn btn-secondary btn-use-stock-prompt text-xs px-3 py-1 flex-shrink-0 self-end mt-1"
+                                            data-prompt="A majestic lion in a misty forest, hyperrealistic, golden hour lighting, soft sunlight rays, dew on grass, detailed fur texture, shallow depth of field, cinematic composition">
+                                            <i class="ph-fill ph-arrow-fat-line-right"></i> Use Prompt
+                                        </button>
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <div class="font-medium ai-text-color text-xs">
+                                            <b>Prompt:</b> Surreal underwater city, glowing jellyfish, bioluminescent plants, dreamy atmosphere<br>
+                                            <span class="text-gray-500">Saran: Tambahkan "soft blue lighting, floating bubbles, ancient ruins, intricate coral structures, wide shot" agar lebih artistik.</span>
+                                        </div>
+                                        <button class="btn btn-secondary btn-use-stock-prompt text-xs px-3 py-1 flex-shrink-0 self-end mt-1"
+                                            data-prompt="Surreal underwater city, glowing jellyfish, bioluminescent plants, dreamy atmosphere, soft blue lighting, floating bubbles, ancient ruins, intricate coral structures, wide shot">
+                                            <i class="ph-fill ph-arrow-fat-line-right"></i> Use Prompt
+                                        </button>
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <div class="font-medium ai-text-color text-xs">
+                                            <b>Prompt:</b> A steampunk robot reading a book in a Victorian library, intricate details<br>
+                                            <span class="text-gray-500">Saran: Tambahkan "warm ambient light, brass and copper textures, shelves filled with old books, clockwork gears, cozy atmosphere" untuk nuansa lebih hidup.</span>
+                                        </div>
+                                        <button class="btn btn-secondary btn-use-stock-prompt text-xs px-3 py-1 flex-shrink-0 self-end mt-1"
+                                            data-prompt="A steampunk robot reading a book in a Victorian library, intricate details, warm ambient light, brass and copper textures, shelves filled with old books, clockwork gears, cozy atmosphere">
+                                            <i class="ph-fill ph-arrow-fat-line-right"></i> Use Prompt
+                                        </button>
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <div class="font-medium ai-text-color text-xs">
+                                            <b>Prompt:</b> A dreamy landscape with floating islands, waterfalls, and rainbow skies, fantasy art<br>
+                                            <span class="text-gray-500">Saran: Tambahkan "lush greenery, magical creatures, sparkling water, soft clouds, vibrant colors, panoramic view" agar lebih imajinatif.</span>
+                                        </div>
+                                        <button class="btn btn-secondary btn-use-stock-prompt text-xs px-3 py-1 flex-shrink-0 self-end mt-1"
+                                            data-prompt="A dreamy landscape with floating islands, waterfalls, and rainbow skies, fantasy art, lush greenery, magical creatures, sparkling water, soft clouds, vibrant colors, panoramic view">
+                                            <i class="ph-fill ph-arrow-fat-line-right"></i> Use Prompt
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
+                    
+                </section>
+                <!-- Dynamic Options Section -->
+                <section class="neumorphic-outset p-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-gear text-indigo-500 text-2xl"></i>
+                        Advanced Options
+                        <button id="info-advanced-options-btn" class="ml-auto flex items-center justify-center w-6 h-6 rounded-full neumorphic-outset-interactive transition-colors border border-black/10 text-base"
+                            style="background: var(--glass-bg); color: var(--primary-color);" title="Informasi">
+                            <i class="ph ph-info"></i>
+                        </button>
+                    </h2>
+                
+                    <span class="text-gray-500 text-sm block mb-6">Atur model AI, gaya seni, pencahayaan, ukuran, dan jumlah gambar yang ingin dihasilkan.</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="model-select" class="font-medium mb-2 block">Model AI</label>
+                            <select id="model-select" class="w-full p-3 neumorphic-inset custom-select focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="style of flux">Flux</option>
+                                <option value="style of gptimage">GPT Image</option>
+                                <option value="style of turbo">Turbo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="art-style-select" class="font-medium mb-2 block">Art Style</label>
+                            <select id="art-style-select" class="w-full p-3 neumorphic-inset custom-select focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="" disabled selected>--Select Style--</option>
+                                <option value="photographic style">photographic</option>
+                                <option value="realistic style">realistic</option>
+                                <option value="digital art style">digital art</option>
+                                <option value="oil painting style">oil painting</option>
+                                <option value="anime style">anime</option>
+                                <option value="pixel art style">pixel art</option>
+                                <option value="fantasy art style">fantasy art</option>
+                                <option value="surrealism style">surrealism</option>
+                                <option value="cartoon style">cartoon</option>
+                                <option value="3d render style">3d render</option>
+                                <option value="gothic art style">gothic art</option>
+                                <option value="cyberpunk style">cyberpunk</option>
+                                <option value="steampunk style">steampunk</option>
+                                <option value="abstract art style">abstract art</option>
+                                <option value="minimalist style">minimalist</option>
+                                <option value="pop art style">pop art</option>
+                                <option value="renaissance style">renaissance</option>
+                                <option value="baroque style">baroque</option>
+                                <option value="impressionism style">impressionism</option>
+                                <option value="expressionism style">expressionism</option>
+                                <option value="cubism style">cubism</option>
+                                <option value="art nouveau style">art nouveau</option>
+                                <option value="bauhaus style">bauhaus</option>
+                                <option value="graffiti art style">graffiti art</option>
+                                <option value="street art style">street art</option>
+                                <option value="sci-fi art style">sci-fi art</option>
+                                <option value="fantasy art style">fantasy art</option>
+                                <option value="horror art style">horror art</option>
+                                <option value="comic book style">comic book</option>
+                                <option value="manga style">manga</option>
+                                <option value="chibi style">chibi</option>
+                                <option value="low poly style">low poly</option>
+                                <option value="voxel art style">voxel art</option>
+                                <option value="isometric style">isometric</option>
+                                <option value="line art style">line art</option>
+                                <option value="sketch art style">sketch art</option>
+                                <option value="charcoal art style">charcoal art</option>
+                                <option value="pastel art style">pastel art</option>
+                                <option value="ink wash painting style">ink wash painting</option>
+                                <option value="calligraphy style">calligraphy</option>
+                                <option value="typography art style">typography art</option>
+                                <option value="watercolor painting style">watercolor painting</option>
+                                <option value="pastel painting style">pastel painting</option>
+                                <option value="charcoal painting style">charcoal painting</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="style-select" class="font-medium mb-2 block">Lighting Style</label>
+                            <select id="style-select" class="w-full p-3 neumorphic-inset custom-select focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="" disabled selected>--Select Lighting--</option>
+                                <option value="cinematic lighting">cinematic</option>
+                                <option value="dramatic lighting">dramatic</option>
+                                <option value="natural lighting">natural</option>
+                                <option value="studio lighting">studio</option>
+                                <option value="backlighting">backlighting</option>
+                                <option value="golden hour lighting">golden hour</option>
+                                <option value="blue hour lighting">blue hour</option>
+                                <option value="moody lighting">moody</option>
+                                <option value="volumetric lighting">volumetric</option>
+                                <option value="fluorescent lighting">fluorescent</option>
+                                <option value="neon lighting">neon</option>
+                                <option value="ambient lighting">ambient</option>
+                                <option value="hard lighting">hard</option>
+                                <option value="diffused lighting">diffused</option>
+                                <option value="rim lighting">rim</option>
+                                <option value="split lighting">split</option>
+                                <option value="butterfly lighting">butterfly</option>
+                                <option value="loop lighting">loop</option>
+                                <option value="rembrandt lighting">rembrandt</option>
+                                <option value="broad lighting">broad</option>
+                                <option value="short lighting">short</option>
+                                <option value="high key lighting">high key</option>
+                                <option value="low key lighting">low key</option>
+                                <option value="silhouette lighting">silhouette</option>
+                                <option value="underwater lighting">underwater</option>
+                                <option value="firelight">firelight</option>
+                                <option value="candlelight">candlelight</option>
+                                <option value="starlight">starlight</option>
+                                <option value="moonlight">moonlight</option>
+                                <option value="sunlight">sunlight</option>
+                                <option value="overcast lighting">overcast</option>
+                                <option value="soft lighting">soft</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="size-select" class="font-medium mb-2 block">Image Size</label>
+                            <select id="size-select" class="w-full p-3 neumorphic-inset custom-select focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="1:1 aspect ratio">1:1 (Square)</option>
+                                <option value="16:9 aspect ratio">16:9 (Landscape)</option>
+                                <option value="9:16 aspect ratio">9:16 (Potrait)</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2 flex items-center">
+                            <div class="flex-1">
+                                <label for="batch-select" class="font-medium mb-2 block">Batch of Images</label>
+                                <select id="batch-select" class="w-full p-3 neumorphic-inset custom-select focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                            <button id="reset-batch-btn" type="button" title="Reset Batch Count"
+                                class="ml-3 mt-6 p-2 rounded-full neumorphic-outset-interactive flex items-center justify-center"
+                                style="width:32px;height:32px;min-width:32px;min-height:32px;">
+                                <i class="ph-fill ph-arrow-counter-clockwise text-lg"></i>
+                            </button>
+                        </div>
+                        
+                    </div>
+                    <div class="mt-6">
+                        <button id="generate-btn" class="btn btn-primary text-lg space-x-2"><i class="ph-fill ph-image text-xl"></i><span>Buat Gambar</span></button>
+                    </div>
+                    <!-- Tips Accordion -->
+                    <div class="mt-3 text-xs">
+                        <button id="tips-accordion-toggle" type="button"
+                            class="w-full flex items-center justify-between p-2 rounded-md neumorphic-outset-interactive glassmorph transition font-medium text-[12px] text-blue-800 focus:outline-none"
+                            style="background: #e0f2fe; border-left: 3px solid #60a5fa;">
+                            <span class="flex items-center gap-1">
+                                <i class="ph ph-lightbulb text-blue-400 text-base"></i>
+                                <b>Tips:</b> Untuk hasil terbaik gambar anda.
+                            </span>
+                            <i id="tips-accordion-arrow" class="ph ph-caret-down text-base transition-transform"></i>
+                        </button>
+                        <div id="tips-accordion-content"
+                            class="hidden mt-1 rounded-md bg-blue-50 border-l-4 border-blue-200 text-blue-800 text-[12px] font-family p-2">
+                            💡  Beberapa opsi mungkin tidak didukung oleh model AI tertentu.
+                            <br>🔍 Gunakan opsi "Otomatis" untuk hasil terbaik.
+                            <br>📏 Ukuran gambar dapat mempengaruhi kecepatan dan kualitas
+                            <br>📊 Batch gambar memungkinkan Anda membuat beberapa gambar sekaligus.
+                            <br>🖼️ Pastikan untuk memilih model AI yang sesuai dengan kebutuhan Anda.
+                            <br>🎨 Pastikan untuk menggunakan gambar yang sesuai dengan gaya dan konten.
+                        </div>
+                    </div>
+                  
+                </section>
+                
+                <!-- Advanced Tools Section -->
+                <section class="neumorphic-outset p-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-gear text-indigo-500 text-2xl"></i>
+                        Editor Tools
+                        <button id="info-editor-tools-btn" class="ml-auto flex items-center justify-center w-6 h-6 rounded-full neumorphic-outset-interactive transition-colors border border-black/10 text-base"
+                            style="background: var(--glass-bg); color: var(--primary-color);" title="Informasi">
+                            <i class="ph ph-info"></i>
+                        </button>
+                    </h2>
+                   
+                    <span class="text-gray-500 text-sm block mb-6">Pilih alat lanjutan untuk mengedit, meningkatkan, atau menambahkan efek pada gambar hasil AI Anda.</span>
+                    <div id="advanced-tools-container">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <button data-tool="video" class="tool-btn"><i class="ph-fill ph-film-strip"></i><span>Video Prompt</span></button>
+                            <button data-tool="audio" class="tool-btn"><i class="ph-fill ph-speaker-high"></i><span>Audio Tools</span></button>
+                            <button data-tool="enhance" class="tool-btn"><i class="ph-fill ph-star"></i><span>Enhance</span></button>
+                            <button data-tool="watermark" class="tool-btn"><i class="ph-fill ph-drop"></i><span>Watermark</span></button>
+                            <button data-tool="upscale" class="tool-btn relative">
+                                <i class="ph-fill ph-magnifying-glass"></i>
+                                <span>AI Vision</span>
+                                <span class="absolute -top-1 -right-2 bg-green-400 text-xs font-bold px-2 py-0.5 rounded-full shadow text-gray-800">Evaluation</span>
+                            </button>
+                            <button data-tool="chat" class="tool-btn relative">
+                                <i class="ph-fill ph-chats-circle"></i>
+                                <span>Chat Asisten</span>
+                                <span class="absolute -top-1 -right-2 bg-yellow-400 text-xs font-bold px-2 py-0.5 rounded-full shadow text-gray-800">Beta</span>
+                            </button>
+                        </div>
+                        <div id="tool-content-container" class="mt-4">
+                            <!-- Video Prompt Tool Content -->
+                            <div id="tool-content-video" class="tool-content neumorphic-inset rounded-lg">
+                                <div class="p-4 space-y-4">
+                                    <h3 class="font-semibold text-lg text-center mb-2">Pengaturan Prompt Video</h3>
+                                    <div class="relative">
+                                        <label for="video-prompt-main" class="text-sm font-bold">Ide Utama / Skenario</label>
+                                        <textarea id="video-prompt-main" rows="3" class="w-full mt-1 p-2 pr-10 neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Contoh: seekor elang terbang di atas pegunungan alpen"></textarea>
+                                        <button id="video-idea-btn" title="✨ Hasilkan Skenario AI" class="absolute top-8 right-3 p-1 rounded-full hover:bg-white/60 neumorphic-outset-interactive"><i class="ph ph-shooting-star text-xl text-purple-500"></i></button>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="video-style" class="text-sm font-bold">Gaya Visual</label>
+                                            <select id="video-style" class="w-full mt-1 p-2 custom-select neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <option value="Ultra realistic">Sangat Realistis</option>
+                                                <option value="cinematic">Sinematik</option>
+                                                <option value="3d animation">Animasi 3D</option>
+                                                <option value="anime style">Gaya Anime</option>
+                                                <option value="digital painting">Lukisan Digital</option>
+                                                <option value="cartoon">Kartun</option>
+                                                <option value="pixel art">Pixel Art</option>
+                                                <option value="fantasy art">Fantasy Art</option>
+                                                <option value="photorealistic">Fotorealistik</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="video-angle" class="text-sm font-bold">Angle Kamera</label>
+                                            <select id="video-angle" class="w-full mt-1 p-2 custom-select neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <option value="eye-level shot">Eye-level</option>
+                                                <option value="low-angle shot">Low Angle</option>
+                                                <option value="high-angle shot">High Angle</option>
+                                                <option value="drone shot">Drone Shot</option>
+                                                <option value="overhead shot">Overhead</option>
+                                                <option value="close up">Close Up</option>
+                                                <option value="wide shot">Wide Shot</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="video-movement" class="text-sm font-bold">Gerakan Kamera</label>
+                                            <select id="video-movement" class="w-full mt-1 p-2 custom-select neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <option value="static shot">Statis</option>
+                                                <option value="slow pan right">Geser Lambat ke Kanan</option>
+                                                <option value="slow pan left">Geser Lambat ke Kiri</option>
+                                                <option value="slow zoom in">Zoom In Lambat</option>
+                                                <option value="slow zoom out">Zoom Out Lambat</option>
+                                                <option value="dolly shot forward">Dolly Maju</option>
+                                                <option value="dolly shot backward">Dolly Mundur</option>
+                                                <option value="tracking shot">Tracking Shot</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="video-duration" class="text-sm font-bold">Durasi</label>
+                                            <select id="video-duration" class="w-full mt-1 p-2 custom-select neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <option value="short (3-5 seconds)">Singkat (3-5 dtk)</option>
+                                                <option value="medium (5-10 seconds)">Sedang (5-10 dtk)</option>
+                                                <option value="long (10-15 seconds)">Panjang (10-15 dtk)</option>
+                                                <option value="custom">Custom</option>
+                                            </select>
+                                            <input id="video-duration-custom" type="text" class="w-full mt-2 p-2 neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500 hidden" placeholder="Contoh: 20 detik">
+                                        </div>
+                                        <div>
+                                            <label for="video-resolution" class="text-sm font-bold">Resolusi</label>
+                                            <select id="video-resolution" class="w-full mt-1 p-2 custom-select neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <option value="1920x1080">Full HD (1920x1080)</option>
+                                                <option value="1280x720">HD (1280x720)</option>
+                                                <option value="1080x1920">Vertical (1080x1920)</option>
+                                                <option value="square (1024x1024)">Square (1024x1024)</option>
+                                                <option value="custom">Custom</option>
+                                            </select>
+                                            <input id="video-resolution-custom" type="text" class="w-full mt-2 p-2 neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500 hidden" placeholder="Contoh: 2048x858">
+                                        </div>
+                                        <div>
+                                            <label for="video-platform" class="text-sm font-bold">Platform Target</label>
+                                            <select id="video-platform" class="w-full mt-1 p-2 custom-select neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <option value="universal">Universal (Veo, Kling, Pika, Runway, Sora, dll)</option>
+                                                <option value="veo">Google Veo</option>
+                                                <option value="kling">Kling</option>
+                                                <option value="pika">Pika</option>
+                                                <option value="runway">Runway</option>
+                                                <option value="sora">OpenAI Sora</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="video-language" class="text-sm font-bold">Bahasa Prompt</label>
+                                            <select id="video-language" class="w-full mt-1 p-2 custom-select neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <option value="english">English</option>
+                                                <option value="indonesian">Bahasa Indonesia</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="video-extra" class="text-sm font-bold">Detail Tambahan (Opsional)</label>
+                                        <textarea id="video-extra" rows="2" class="w-full mt-1 p-2 neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Contoh: lighting, mood, color grading, efek khusus, dsb"></textarea>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2 mt-4 justify-between">
+                                        <button id="generate-video-preview-btn" class="btn btn-primary flex-1 min-w-[120px] max-w-[180px] flex items-center justify-center gap-2">
+                                            <i class="ph-fill ph-play-circle"></i>
+                                            <span>Generate Preview</span>
+                                        </button>
+                                        <div class="relative flex-1 min-w-[120px] max-w-[180px]">
+                                            <button id="export-dropdown-btn" class="btn btn-secondary w-full flex items-center justify-center gap-2">
+                                                <i class="ph-fill ph-file-text"></i>
+                                                <span>Export</span>
+                                                <i class="ph ph-caret-down ml-1"></i>
+                                            </button>
+                                            <div id="export-dropdown-menu" class="absolute left-0 top-full mt-1 w-full bg-white dark:bg-gray-800 neumorphic-inset rounded shadow z-10 hidden">
+                                                <button id="download-video-prompt-btn" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                    <i class="ph-fill ph-file-text"></i> Export ke TXT
+                                                </button>
+                                                <button id="export-video-prompt-pdf-btn" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                    <i class="ph-fill ph-file-pdf"></i> Export ke PDF
+                                                </button>
+                                                <button id="copy-video-prompt-btn" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                    <i class="ph-fill ph-copy"></i> Salin Prompt
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Preview Prompt Area (hidden by default) -->
+                                    <div id="video-prompt-preview-container" class="mt-4 hidden">
+                                        <label class="font-bold text-xs mb-1 block">Preview Prompt</label>
+                                        <div id="video-prompt-preview" class="neumorphic-inset p-3 rounded text-xs whitespace-pre-line bg-gray-50 dark:bg-gray-800"></div>
+                                    </div>
+                                    <!-- Preview Result Area -->
+                                    <div id="video-preview-result" class="mt-4 hidden">
+                                        <label class="font-bold text-xs mb-1 block">Hasil Preview (Simulasi)</label>
+                                        <div class="neumorphic-inset p-3 rounded text-xs bg-gray-100 dark:bg-gray-900 flex items-center gap-3">
+                                            <i class="ph-fill ph-video-camera text-xl text-indigo-500"></i>
+                                            <span id="video-preview-result-text"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+                               
+                            </div>
+                            <!-- Audio Tool Content -->
+                            <div id="tool-content-audio" class="tool-content neumorphic-inset rounded-lg">
+                                <div class="p-4 space-y-4">
+                                    <h3 class="font-semibold text-lg text-center mb-2">Text-to-Speech (TTS)</h3>
+                                    <div>
+                                        <label for="audio-character" class="text-sm font-bold">Karakter Suara (untuk Ide AI)</label>
+                                        <input type="text" id="audio-character" class="w-full mt-1 p-2 neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Contoh: narator film dokumenter, suara robot, dll.">
+                                    </div>
+                                    <div class="relative">
+                                        <label for="audio-narration" class="text-sm font-bold">Teks Narasi / Script</label>
+                                        <textarea id="audio-narration" rows="4" class="w-full mt-1 p-2 pr-10 neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Masukkan teks yang ingin diubah menjadi suara..."></textarea>
+                                        <button id="audio-idea-btn" title="✨ Hasilkan Narasi AI" class="absolute top-8 right-3 p-1 rounded-full hover:bg-white/60 neumorphic-outset-interactive"><i class="ph ph-shooting-star text-xl text-purple-500"></i></button>
+                                    </div>
+                                    <div>
+                                        <label for="audio-voice-model" class="text-sm font-bold">Model Suara</label>
+                                        <select id="audio-voice-model" class="w-full mt-1 p-2 custom-select neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                            <!-- Options will be populated by JS -->
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button id="clear-audio-btn" class="btn btn-danger text-sm space-x-2"><i class="ph-fill ph-trash"></i><span>Bersihkan</span></button>
+                                        <button id="generate-audio-btn" class="btn btn-secondary text-sm space-x-2">
+                                            <span class="btn-text">Buat Audio</span>
+                                            <svg class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                        </button>
+                                    </div>
+                                    <div id="audio-result-container" class="hidden neumorphic-inset p-2 rounded-lg"></div>
+                                </div>
+                            </div>
+                            <!-- Enhance Tool Content -->
+                            <div id="tool-content-enhance" class="tool-content neumorphic-inset rounded-lg">
+                                <div class="p-4 space-y-4">
+                                     <h3 class="font-semibold text-lg text-center mb-2">Tingkatkan Kualitas Gambar</h3>
+                                     
+                                     <!-- Step 1: Image Selection -->
+                                    <div id="enhance-selection-container">
+                                        <p class="text-sm font-bold mb-2">1. Pilih Gambar dari Hasil Terakhir</p>
+                                        <div id="enhance-thumbnails" class="flex flex-wrap gap-2 p-2 neumorphic-inset rounded-lg max-h-28 overflow-y-auto">
+                                            <!-- Thumbnails will be populated by JS -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 2: Preview and Options -->
+                                    <div id="enhance-options-container" class="hidden space-y-4">
+                                        <p class="text-sm font-bold">2. Pratinjau & Opsi</p>
+                                        <div class="flex gap-4 items-center">
+                                            <img id="enhance-preview" src="" alt="Pratinjau Enhance" class="w-24 h-24 object-contain rounded-lg neumorphic-inset p-1">
+                                            <div class="flex-grow">
+                                                <label for="enhance-filter-select" class="text-sm font-bold">Pilih Filter</label>
+                                                <select id="enhance-filter-select" class="w-full mt-1 p-2 custom-select neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                    <option value="sharpen">Sharpen</option>
+                                                    <option value="grayscale">Grayscale</option>
+                                                    <option value="sepia">Sepia</option>
+                                                    <option value="invert">Invert</option>
+                                                    <option value="vintage">Vintage</option>
+                                                    <option value="high-contrast">High Contrast</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <button id="run-enhance-btn" class="btn btn-secondary w-full text-sm space-x-2">
+                                            <i class="ph-fill ph-star"></i>
+                                            <span>Terapkan Filter</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Step 3: Result with Side-by-Side Comparison -->
+                                    <div id="enhance-result-container" class="hidden space-y-4">
+                                         <p class="text-sm font-bold">3. Hasil</p>
+                                         <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <p class="text-xs font-bold text-center mb-1">Sesudah</p>
+                                                <div class="neumorphic-inset p-1 rounded-lg">
+                                                    <canvas id="after-canvas" class="w-full h-auto rounded-md"></canvas>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-center mb-1">Sebelum</p>
+                                                <div class="neumorphic-inset p-1 rounded-lg">
+                                                    <img id="before-image" class="w-full h-auto rounded-md">
+                                                </div>
+                                            </div>
+                                         </div>
+                                         <button id="download-enhanced-btn" class="btn btn-primary w-full text-sm space-x-2">
+                                            <i class="ph-fill ph-download-simple"></i>
+                                            <span>Unduh Hasil</span>
+                                         </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="tool-content-watermark" class="tool-content neumorphic-inset rounded-lg">
+                                <div class="p-4 space-y-4">
+                                    <h3 class="font-semibold text-lg text-center mb-2">Tambahkan Watermark ke Gambar</h3>
+                                    <!-- Step 1: Pilih Gambar -->
+                                    <div id="watermark-selection-container">
+                                        <p class="text-sm font-bold mb-2">1. Pilih Gambar dari Hasil Terakhir</p>
+                                        <div id="watermark-thumbnails" class="flex flex-wrap gap-2 p-2 neumorphic-inset rounded-lg max-h-28 overflow-y-auto">
+                                            <!-- Thumbnails will be populated by JS -->
+                                        </div>
+                                    </div>
+                                    <!-- Step 2: Preview & Actions -->
+                                    <div id="watermark-preview-container" class="hidden space-y-4">
+                                        <p class="text-sm font-bold">2. Pratinjau & Aksi</p>
+                                        <div class="flex items-center justify-center">
+                                            <canvas id="watermark-canvas" class="rounded-lg neumorphic-inset max-w-full"></canvas>
+                                        </div>
+                                       
+                                    </div>
+                                    <!-- Step 3: Pilih Opsi Watermark -->
+                                    <div id="watermark-options-container" class="hidden space-y-4">
+                                        <p class="text-sm font-bold">3. Opsi Watermark</p>
+                                        <div class="flex flex-col md:flex-row gap-4">
+                                            <!-- Text Watermark -->
+                                            <div class="flex-1 space-y-2">
+                                                <label class="font-bold text-xs">Teks Watermark</label>
+                                                <textarea id="watermark-text" rows="2" class="w-full p-2 neumorphic-inset focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Masukkan teks watermark..."></textarea>
+                                                <div class="flex items-center gap-2">
+                                                    <label class="text-xs font-bold">Ukuran</label>
+                                                    <input id="watermark-fontsize" type="range" min="10" max="120" value="36" class="flex-1">
+                                                    <span id="watermark-fontsize-value" class="text-xs">36px</span>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <label class="text-xs font-bold">Transparansi</label>
+                                                    <input id="watermark-opacity" type="range" min="0" max="100" value="40" class="flex-1">
+                                                    <span id="watermark-opacity-value" class="text-xs">40%</span>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <label class="text-xs font-bold">Warna</label>
+                                                    <input id="watermark-color" type="color" value="#ffffff" class="w-8 h-8 rounded border-2 border-gray-300 neumorphic-inset">
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <label class="text-xs font-bold">Font</label>
+                                                    <select id="watermark-fontfamily" class="neumorphic-inset p-1">
+                                                        <option value="Arial">Arial</option>
+                                                        <option value="Inter">Inter</option>
+                                                        <option value="Times New Roman">Times New Roman</option>
+                                                        <option value="Courier New">Courier New</option>
+                                                        <option value="Comic Sans MS">Comic Sans</option>
+                                                        <option value="Impact">Impact</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!-- Logo Watermark -->
+                                            <div class="flex-1 space-y-2">
+                                                <label class="font-bold text-xs">Logo Watermark</label>
+                                                <input type="file" id="watermark-logo-upload" accept="image/*" class="block w-full neumorphic-inset p-2">
+                                                <div id="watermark-logo-preview-container" class="mt-2 flex items-center gap-2">
+                                                    <img id="watermark-logo-preview" src="" alt="Logo Preview" class="hidden w-16 h-16 object-contain rounded-md border border-gray-300">
+                                                    <button id="watermark-remove-logo" class="btn btn-danger text-xs px-2 py-1 hidden"><i class="ph-fill ph-trash"></i> Hapus Logo</button>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <label class="text-xs font-bold">Ukuran Logo</label>
+                                                    <input id="watermark-logo-size" type="range" min="10" max="100" value="30" class="flex-1">
+                                                    <span id="watermark-logo-size-value" class="text-xs">30%</span>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <label class="text-xs font-bold">Transparansi Logo</label>
+                                                    <input id="watermark-logo-opacity" type="range" min="0" max="100" value="40" class="flex-1">
+                                                    <span id="watermark-logo-opacity-value" class="text-xs">40%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Anchor Position -->
+                                        <div class="mt-4">
+                                            <label class="font-bold text-xs mb-1 block">Posisi Watermark</label>
+                                            <div id="watermark-anchor-grid" class="grid grid-cols-3 gap-1 w-40 mx-auto">
+                                                <button data-anchor="topleft" class="anchor-btn p-2 neumorphic-inset">↖️</button>
+                                                <button data-anchor="top" class="anchor-btn p-2 neumorphic-inset">⬆️</button>
+                                                <button data-anchor="topright" class="anchor-btn p-2 neumorphic-inset">↗️</button>
+                                                <button data-anchor="left" class="anchor-btn p-2 neumorphic-inset">⬅️</button>
+                                                <button data-anchor="center" class="anchor-btn p-2 neumorphic-inset font-bold">●</button>
+                                                <button data-anchor="right" class="anchor-btn p-2 neumorphic-inset">➡️</button>
+                                                <button data-anchor="bottomleft" class="anchor-btn p-2 neumorphic-inset">↙️</button>
+                                                <button data-anchor="bottom" class="anchor-btn p-2 neumorphic-inset">⬇️</button>
+                                                <button data-anchor="bottomright" class="anchor-btn p-2 neumorphic-inset">↘️</button>
+                                                <div></div>
+                                                <!-- Jeda antar tombol posisi watermark -->
+                                                <div class="col-span-3 h-2"></div>
+                                            </div>
+                                            <div class="flex gap-3">
+                                            <button id="clear-watermark-btn" class="btn btn-danger flex-1 space-x-2"><i class="ph-fill ph-trash"></i><span>Bersihkan</span></button>
+                                            <button id="download-watermark-btn" class="btn btn-primary flex-1 space-x-2"><i class="ph-fill ph-download-simple"></i><span>Unduh</span></button>
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-content-upscale" class="tool-content neumorphic-inset rounded-lg">
+                                <div class="p-4 flex flex-col gap-4">
+                                    <h3 class="font-semibold text-lg text-center mb-2">Image to Prompt</h3>
+                                    <div>
+                                        <label class="text-sm font-bold mb-1 block">Model AI (Fixed)</label>
+                                        <input type="text" id="upscale-model-select" class="w-full neumorphic-inset p-2" value="mistralai/mistral-small-3.2-24b-instruct:free" disabled>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-bold mb-1 block">Unggah Gambar</label>
+                                        <input type="file" id="upscale-image-upload" accept="image/*" class="w-full neumorphic-inset p-2">
+                                        <div id="upscale-image-preview-container" class="mt-2 flex items-center gap-2">
+                                            <img id="upscale-image-preview" src="" alt="Preview" class="hidden w-24 h-24 object-contain rounded-md border border-gray-300">
+                                            <button id="upscale-remove-image" class="btn btn-danger text-xs px-2 py-1 hidden"><i class="ph-fill ph-trash"></i> Hapus</button>
+                                        </div>
+                                    </div>
+                                    <button id="upscale-generate-btn" class="btn btn-secondary w-full text-sm space-x-2" disabled>
+                                        <i class="ph-fill ph-magic-wand"></i>
+                                        <span>Analisa & Buat Prompt</span>
+                                    </button>
+                                    <div id="upscale-result-container" class="hidden mt-4">
+                                        <label class="text-sm font-bold mb-1 block">Prompt Hasil Analisa</label>
+                                        <div class="neumorphic-inset p-3 rounded mb-2 text-sm" id="upscale-result-text"></div>
+                                        <button class="btn btn-primary btn-use-prompt text-xs px-3 py-1" id="upscale-use-prompt-btn">
+                                            <i class="ph-fill ph-arrow-fat-line-right"></i> Use Prompt
+                                        </button>
+                                    </div>
+                                </div>
+                               
+                            </div>
+                            <div id="tool-content-chat" class="tool-content neumorphic-inset rounded-lg">
+                                <div class="p-4 flex flex-col gap-4 h-[400px]">
+                                    <h3 class="font-semibold text-lg text-center mb-2">Chat Asisten Prompt</h3>
+                                    <div id="chat-messages" class="flex-1 overflow-y-auto neumorphic-inset p-2 rounded mb-2 text-sm space-y-3"></div>
+                                    <form id="chat-form" class="flex gap-2">
+                                        <input id="chat-input" type="text" class="flex-1 neumorphic-inset p-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 max-w-full sm:max-w-none text-sm" placeholder="Tulis pertanyaan seputar prompt..." style="min-width:0;">
+                                        <button type="submit" class="btn btn-primary text-xs px-3 py-1 flex-shrink-0 min-w-[50px] max-w-[60px] whitespace-nowrap">Kirim</button>
+                                    </form>
+                                </div>
+                                
+                            </div>
+                            
+                           
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Image Display & History -->
+            <div class="flex flex-col space-y-8 mt-8 lg:mt-0">
+                <!-- Image Results Grid -->
+                <section id="image-display-area" class="relative neumorphic-inset p-4 min-h-[300px] flex items-center justify-center">
+                    <div id="image-grid" class="w-full h-full">
+                        <!-- Slots will be populated by JS -->
+                    </div>
+                </section>
+                
+                <!-- Image History -->
+                <section class="neumorphic-outset p-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-images text-indigo-500 text-2xl"></i>
+                        Riwayat Gambar
+                    </h2>
+                    <div id="history-container" class="flex flex-wrap gap-4 max-h-48 overflow-y-auto neumorphic-inset p-2">
+                        <p id="history-placeholder" class="text-gray-500 w-full text-center">Belum ada riwayat.</p>
+                        <!-- History thumbnails will be populated by JS -->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    
+    <!-- FOOTER -->
+    <footer class="py-6" style="padding-bottom: 8rem;">
+        <div class="container mx-auto text-center text-sm">
+            <div class="flex flex-col items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2 justify-center text-gray-500">
+                    <span><b>© 2024 TKK Imagen</b></span>
+                    <span class="text-gray-400">|</span>
+                    <span><b>Made With ❤️ By TKK Teams.</b></span>
+                    <span class="text-gray-400"></span>
+                </div>
+                <div class="text-gray-400 mt-2">
+                    Best AI Image Generator • Bergabung di <a href="https://www.facebook.com/groups/407347088866675" target="_blank" class="underline hover:text-blue-600">Komunitas Facebook</a>.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- GLOBAL LOADING SPINNER -->
+    <div id="loading-indicator" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+        <div class="neumorphic-outset p-6 rounded-lg flex flex-col items-center gap-4 w-full max-w-xs">
+             <svg class="animate-spin h-10 w-10 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+           <p id="loading-text" class="font-medium text-center">Membuat keajaiban...</p>
+        </div>
+   </div>
+
+    <!-- INFO MODAL DIALOG -->
+    <div id="info-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="neumorphic-outset p-6 max-w-sm w-full text-center">
+            <h3 id="info-modal-title" class="text-xl font-bold mb-2"></h3>
+            <p id="info-modal-message" class="text-gray-600 mb-6"></p>
+            <button onclick="closeInfoModal()" class="px-6 py-2 font-medium btn btn-primary">Mengerti</button>
+        </div>
+    </div>
+
+    <!-- PREVIEW MODAL DIALOG -->
+    <div id="preview-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="neumorphic-outset p-6 max-w-[90vw] sm:max-w-sm md:max-w-lg w-full flex flex-col items-center gap-4 md:flex-row md:items-start md:gap-6 relative">
+            <button id="close-preview-btn" class="absolute -top-3 -right-3 p-2 bg-white rounded-full neumorphic-outset-interactive z-10">
+                <i class="ph-fill ph-x text-xl"></i>
+            </button>
+            <!-- Image Preview -->
+            <div class="w-32 md:w-1/2 flex-shrink-0 neumorphic-inset p-2">
+                <img id="preview-image" src="" alt="Pratinjau Gambar" class="w-full h-full object-contain rounded-md">
+            </div>
+            <!-- Image Details -->
+            <div class="w-full md:w-1/2 flex flex-col text-center md:text-left">
+                <h3 class="text-xl font-bold mb-2">Detail Gambar</h3>
+                <p class="font-semibold mb-1">Prompt:</p>
+                <div class="text-gray-600 text-sm neumorphic-inset p-3 flex-grow overflow-y-auto h-32 md:h-auto">
+                    <p id="preview-prompt"></p>
+                </div>
+                <div class="mt-4">
+                    <button id="reuse-prompt-btn" class="btn btn-secondary w-full text-sm space-x-2">
+                        <i class="ph-fill ph-arrow-clockwise"></i>
+                        <span>Gunakan Ulang Prompt</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DONATION MODAL -->
+    <div id="donation-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="neumorphic-outset p-6 max-w-sm w-full text-center relative">
+            <button id="close-donation-btn" class="absolute top-3 right-3 p-2 rounded-full neumorphic-outset-interactive">
+                <i class="ph-fill ph-x"></i>
+            </button>
+            <i class="ph-fill ph-heart-straight text-4xl text-red-500 mb-2"></i>
+            <h3 class="text-xl font-bold mb-2">Dukung Kreasi Kami</h3>
+            <p class="text-sm text-gray-600 mb-4">Setiap donasi Anda sangat berarti dan akan membantu kami untuk terus mengembangkan alat ini menjadi lebih baik lagi. Terima kasih!</p>
+            
+            <div class="my-6">
+                <label for="donation-amount" class="font-medium mb-2 block">Jumlah Donasi (Rp)</label>
+                <input type="number" id="donation-amount" class="w-full p-3 text-center text-lg font-bold neumorphic-inset focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="ketik Jumlah">
+            </div>
+
+            <p class="text-xs mb-2 font-semibold">Metode Pembayaran</p>
+            <div class="flex justify-center items-center gap-4 mb-6">
+                <span class="font-bold text-blue-600">DANA</span>
+                <span class="font-bold text-purple-600">OVO</span>
+                <span class="font-bold">QRIS</span>
+            </div>
+
+            <div class="flex gap-4">
+                <a href="https://www.facebook.com/groups/407347088866675" target="_blank" class="btn btn-secondary text-sm w-1/2">Kontak Admin</a>
+                <button id="send-donation-btn" class="btn btn-primary text-sm w-1/2">Kirim Donasi</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
